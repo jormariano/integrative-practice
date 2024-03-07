@@ -1,3 +1,5 @@
+// After primer pre-entrega: 12'
+
 import { promises as fs } from 'fs';
 
 export class CartManager {

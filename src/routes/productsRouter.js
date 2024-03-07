@@ -31,11 +31,15 @@ productsRouter.get('/', async (req, res) => {
     const prodsLimit = prods.slice(0, limit);
 
     // la peticion fue correcta
-    res.status(200).send(prodsLimit);
+    res.status(200).render('templates/home', {
+      showProducts: true,
+      products: prodsLimit,
+      css: 'home.css',
+    });
   } catch (error) {
-    res
-      .status(500)
-      .send(`Error interno del servidor al consultar producto: ${error}`);
+    res.status(500).render('templates/error', {
+      error: error,
+    });
   }
 });
 
