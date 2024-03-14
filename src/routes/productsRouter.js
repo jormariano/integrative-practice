@@ -1,17 +1,22 @@
 // Clase 8 - 11'
 import { Router } from 'express';
-import { ProductManager } from '../config/ProductManager.js';
+import productModel from '../models/product.js';
 
 const productsRouter = Router();
-
-const productManager = new ProductManager('./src/data/products.json');
 
 productsRouter.get('/', async (req, res) => {
   try {
     // limit entre {} porque puede existir mas de un elemento para buscar. http://localhost:8000/products?limit=2
     const { limit } = req.query;
 
-    const prods = await productManager.getProducts();
+    // .lean() es para pasar a json. Cambie productManager.getProduct(); por:
+    const prods = await productModel.find().lean();
+
+    let limits = parseInt(limit);
+
+    if (!limits) {
+      limits = prods.lenght;
+    }
 
     /* el metodo slice() se utiliza para extraer una porción de un array y devolverla como un nuevo array.
     No modifica el array original, devuelve un nuevo array que contiene los elementos seleccionados. 
@@ -21,12 +26,6 @@ productsRouter.get('/', async (req, res) => {
     Para resolver esto, utilizamos el metodo parseInt porque su funcion es convertir una cadena (string) en un número entero 
     Al parsear un string no numerico, devuelve NaN
     */
-
-    let limits = parseInt(limit);
-
-    if (!limits) {
-      limits = prods.lenght;
-    }
 
     const prodsLimit = prods.slice(0, limit);
 
@@ -47,7 +46,10 @@ productsRouter.get('/', async (req, res) => {
 productsRouter.get('/:pid', async (req, res) => {
   try {
     const idProduct = req.params.pid; //Todo dato que se consulta desde un parametro es un string
-    const prod = await productManager.getProductById(idProduct);
+
+    // Cambie productManager.getProductById(idProduct); por:
+    const prod = await productModel.findById(idProduct);
+
     if (prod) res.status(200).send(prod);
     else res.status(404).send('Producto no existe');
   } catch (error) {
@@ -60,14 +62,12 @@ productsRouter.get('/:pid', async (req, res) => {
 productsRouter.post('/', async (req, res) => {
   try {
     // todo dato que se consulta desde un parametro es un string, si es un numero hay que parsearlo
-    const idProduct = req.body;
-    const message = await productManager.addProduct(idProduct);
+    const product = req.body;
 
-    if (message == 'Producto creado exitosamente') {
-      res.status(200).send(message);
-    } else {
-      res.status(400).send(message);
-    }
+    // Cambie productManager.addProduct(product); por:
+    const message = await productModel.create(product);
+
+    res.status(201).send(message);
   } catch (error) {
     res
       .status(500)
@@ -79,20 +79,14 @@ productsRouter.post('/', async (req, res) => {
 productsRouter.put('/:pid', async (req, res) => {
   try {
     // todo dato que se consulta desde un parametro es un string, si es un numero hay que parsearlo
-    const idProducto = req.params.pid;
+    const idProduct = req.params.pid;
     const updateProduct = req.body;
-    const message = await productManager.updateProduct(
-      idProducto,
+    const product = await productModel.findByIdAndUpdate(
+      idProduct,
       updateProduct
     );
 
-    if (message == 'El producto fue actualizado correctamente') {
-      res.status(200).send(message);
-
-      //La opcion de retornar que el producto no existe esta creada en el metodo en ProducstManager, no es necesario repetirla
-    } else {
-      res.status(404).send(message);
-    }
+    res.status(200).send(product);
   } catch (error) {
     res
       .status(500)
@@ -103,10 +97,9 @@ productsRouter.put('/:pid', async (req, res) => {
 productsRouter.delete('/:pid', async (req, res) => {
   try {
     const idProduct = req.params.pid;
-    const message = await productManager.deleteProduct(idProduct);
-    if (message == 'Producto eliminado correctamente')
-      res.status(200).send(message);
-    else res.status(404).send(message);
+    const message = await productModel.findByIdAndDelete(idProduct);
+
+    res.status(200).send(message);
   } catch (error) {
     res
       .status(500)

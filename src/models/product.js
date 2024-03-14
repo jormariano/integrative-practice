@@ -1,30 +1,32 @@
 import { Schema, model } from 'mongoose';
 
-const userSchema = new Schema({
-  name: {
+const productSchema = new Schema({
+  title: {
     type: String,
     require: true,
   },
-  lastname: {
+  description: {
     type: String,
     require: true,
   },
-  password: {
-    type: String,
-    require: true,
-  },
-  age: {
+  price: {
     type: Number,
     require: true,
   },
-  mail: {
+  stock: {
+    type: Number,
+    require: true,
+  },
+  code: {
     type: String,
+    require: true,
     unique: true,
   },
-  rol: {
-    type: String,
-    default: 'User',
+  thumbnail: {
+    default: [],
   },
 });
 
-export const userModel = model('users', userSchema);
+const productModel = model('products', productSchema);
+
+export default productModel;

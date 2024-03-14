@@ -23,6 +23,7 @@ import { engine } from 'express-handlebars';
 import { Server } from 'socket.io';
 import chatRouter from './routes/chatRouter.js';
 import userRouter from './routes/userRouter.js';
+import messageModel from './models/messages.js';
 
 // Configuraciones
 const app = express();
@@ -37,7 +38,7 @@ const io = new Server(server);
 // Connection Data Base
 mongoose
   .connect(
-    'mongodb+srv://jorgelinamariano01:jorgelinacoderhouse@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+    'mongodb+srv://jorgelinamariano01:password@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
   )
   .then(() => console.log('DB is connected'))
   .catch((e) => console.log(e));
@@ -49,16 +50,21 @@ app.set('view engine', 'handlebars');
 // Las vistas de la aplicacion se encuentran en:
 app.set('views', __dirname + '/views');
 
-// En main.js Chatbox: Deberia venir de la base de datos
-const messages = [];
+// Los mensajes vienen de la base de datos
 
 io.on('connection', (socket) => {
   console.log('Conexion con socket.io');
 
-  socket.on('message', (info) => {
-    console.log(info);
-    messages.push(info);
-    io.emit('messageLogs', messages);
+  socket.on('message', async (message) => {
+    try {
+      await messageModel.create(message);
+
+      const messages = await messageModel.find();
+
+      io.emit('messageLogs', messages);
+    } catch (error) {
+      io.emit('messageLogs', error);
+    }
   });
 });
 
