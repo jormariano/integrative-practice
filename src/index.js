@@ -17,10 +17,12 @@ import express from 'express';
 import productsRouter from './routes/productsRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import upload from './config/multer.js';
+import mongoose from 'mongoose';
 import { __dirname } from './path.js';
 import { engine } from 'express-handlebars';
 import { Server } from 'socket.io';
 import chatRouter from './routes/chatRouter.js';
+import userRouter from './routes/userRouter.js';
 
 // Configuraciones
 const app = express();
@@ -31,6 +33,14 @@ const server = app.listen(PORT, () => {
   console.log(`Server on port ${PORT}`);
 });
 const io = new Server(server);
+
+// Connection Data Base
+mongoose
+  .connect(
+    'mongodb+srv://jorgelinamariano01:jorgelinacoderhouse@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+  )
+  .then(() => console.log('DB is connected'))
+  .catch((e) => console.log(e));
 
 // Middlewares: intermediario que se ejecuta antes de llegar al endpoint. Express no trabaja con json y usa un middleware
 app.use(express.json());
@@ -78,6 +88,7 @@ app.use('/public', express.static(__dirname + '/public'));
 app.use('/api/products', productsRouter, express.static(__dirname + '/public'));
 app.use('/api/cart', cartRouter);
 app.use('/api/chat', chatRouter, express.static(__dirname + '/public'));
+app.use('/api/users', userRouter);
 
 // Se agrega el middleware entre la ruta('/upload') y el contenido de la ruta((req, res) => {) para subir imagenes
 // .single() es un metodo de multer para enviar solo un elemento a la vez
