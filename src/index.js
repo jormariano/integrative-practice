@@ -14,16 +14,12 @@
 
 // Express para creacion del servidor
 import express from 'express';
-import productsRouter from './routes/productsRouter.js';
-import cartRouter from './routes/cartRouter.js';
-import upload from './config/multer.js';
 import mongoose from 'mongoose';
 import { __dirname } from './path.js';
 import { engine } from 'express-handlebars';
 import { Server } from 'socket.io';
-import chatRouter from './routes/chatRouter.js';
-import userRouter from './routes/userRouter.js';
 import messageModel from './models/messages.js';
+import indexRouter from './routes/indexRouter.js';
 
 // Configuraciones
 const app = express();
@@ -38,7 +34,7 @@ const io = new Server(server);
 // Connection Data Base
 mongoose
   .connect(
-    'mongodb+srv://jorgelinamariano01:password@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+    'mongodb+srv://jorgelinamariano01:jorgelinacoderhouse@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
   )
   .then(() => console.log('DB is connected'))
   .catch((e) => console.log(e));
@@ -50,8 +46,10 @@ app.set('view engine', 'handlebars');
 // Las vistas de la aplicacion se encuentran en:
 app.set('views', __dirname + '/views');
 
-// Los mensajes vienen de la base de datos
+// Routes
+app.use('/', indexRouter);
 
+// Los mensajes vienen de la base de datos
 io.on('connection', (socket) => {
   console.log('Conexion con socket.io');
 
@@ -88,68 +86,6 @@ io.on('connection', (socket) => {
 */
 
 // .on es para recibir y .emit es para enviar
-
-// Routes
-app.use('/public', express.static(__dirname + '/public'));
-app.use('/api/products', productsRouter, express.static(__dirname + '/public'));
-app.use('/api/cart', cartRouter);
-app.use('/api/chat', chatRouter, express.static(__dirname + '/public'));
-app.use('/api/users', userRouter);
-
-// Se agrega el middleware entre la ruta('/upload') y el contenido de la ruta((req, res) => {) para subir imagenes
-// .single() es un metodo de multer para enviar solo un elemento a la vez
-app.post('/upload', upload.single('product'), (req, res) => {
-  try {
-    console.log(req.file);
-    res.status(200).send('Imagen cargada correctamente');
-  } catch (e) {
-    res.status(500).send('Error al cargar imagen');
-  }
-});
-
-/*
-
-// Al ir a static renderiza lo que aparece en home.handlebars
-app.get('/static', (req, res) => {
-  const products = [
-    {
-      id: 1,
-      title: 'El principito',
-      price: 2000,
-      stock: 5,
-      img: 'https://www.tematika.com/media/catalog/Ilhsa/Imagenes/594472.jpg',
-    },
-    {
-      id: 2,
-      title: '1Q84',
-      price: 4000,
-      stock: 10,
-      img: 'https://http2.mlstatic.com/D_NQ_NP_738437-MLA72789173673_112023-O.webp',
-    },
-    {
-      id: 3,
-      title: 'Al calor del verano',
-      price: 6000,
-      stock: 15,
-      img: 'https://images.cdn1.buscalibre.com/fit-in/360x360/33/5e/335e1123c18fe76ade7890da85a09fdd.jpg',
-    },
-    {
-      id: 4,
-      title: 'Crimen y Castigo',
-      price: 6000,
-      stock: 10,
-      // ./ es para posicionarse en la carpeta public
-      img: './img/crimenycastigo.jpeg',
-    },
-  ];
-  res.render('templates/products', {
-    showProducts: true,
-    products: products,
-    css: 'home.css',
-  });
-});
-
-*/
 
 /* 
 CRUD: Create, Read, Update, Delete

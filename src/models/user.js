@@ -20,6 +20,7 @@ const userSchema = new Schema({
   mail: {
     type: String,
     unique: true,
+    index: true,
   },
   rol: {
     type: String,
