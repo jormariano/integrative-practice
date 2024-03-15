@@ -34,7 +34,7 @@ const io = new Server(server);
 // Connection Data Base
 mongoose
   .connect(
-    'mongodb+srv://jorgelinamariano01:jorgelinacoderhouse@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+    'mongodb+srv://jorgelinamariano01:password@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
   )
   .then(() => console.log('DB is connected'))
   .catch((e) => console.log(e));
