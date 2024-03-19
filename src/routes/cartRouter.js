@@ -3,6 +3,7 @@ import cartModel from '../models/cart.js';
 
 const cartRouter = Router();
 
+// Creamos un carrito
 cartRouter.post('/', async (req, res) => {
   try {
     const message = await cartModel.create({ products: [] });
@@ -14,6 +15,7 @@ cartRouter.post('/', async (req, res) => {
   }
 });
 
+// Se consulta el carrito por su id
 cartRouter.get('/:cid', async (req, res) => {
   try {
     const cartId = req.params.cid;
@@ -26,6 +28,7 @@ cartRouter.get('/:cid', async (req, res) => {
   }
 });
 
+// Se crea un nuevo producto en el carrito
 cartRouter.post('/:cid/:pid', async (req, res) => {
   try {
     const cartId = req.params.cid;
@@ -52,5 +55,88 @@ cartRouter.post('/:cid/:pid', async (req, res) => {
       .send(`Error interno del servidor al crear producto: ${error}`);
   }
 });
+
+// DELETE: Es para eliminar un producto segun su id en el carrito
+cartRouter.delete('/:cid/products/:pid', async (req, res) => {
+  try {
+    const cartId = req.params.cid;
+    const productId = req.params.pid;
+
+    const updatedCart = await cartModel.findOneAndUpdate(
+      { _id: cartId },
+
+      // Se elimina el producto del array segun el id
+      { $pull: { products: { id_prod: productId } } },
+
+      // Se devuelve el carrito actualizado
+      { new: true }
+    );
+
+    if (updatedCart) {
+      res
+        .status(200)
+        .send('Producto eliminado del carrito correctamente.', updatedCart);
+    } else {
+      res.status(404).send('Carrito no encontrado');
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .send(`Error interno del servidor al eliminar producto: ${error}`);
+  }
+});
+
+cartRouter.delete('/:cid/products', async (req, res) => {
+  try {
+    const cartId = req.params.cid;
+
+    const updatedCart = await cartModel.findByIdAndUpdate(
+      cartId,
+
+      // Se establece el array de productos como vacío
+      { products: [] },
+
+      // Se devuelve el carrito actualizado
+      { new: true }
+    );
+
+    if (updatedCart) {
+      res.status(200).send(updatedCart);
+    } else {
+      res.status(404).send('Carrito no encontrado.');
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .send(
+        `Error interno del servidor al eliminar productos del carrito: ${error}`
+      );
+  }
+});
+
+/*
+
+// PUT: Es para actualizar un producto segun su id en el carrito
+cartRouter.put('/:cid/:pid', async (req, res) => {
+  try {
+    const idProduct = req.params.pid;
+    const updateProduct = req.body;
+    const product = await productModel.findByIdAndUpdate(
+      idProduct,
+      updateProduct
+    );
+
+    res.status(200).send(product);
+  } catch (error) {
+    res
+      .status(500)
+      .send(`Error interno del servidor al actualizar producto: ${error}`);
+  }
+});
+
+
+
+
+*/
 
 export default cartRouter;

@@ -3,17 +3,21 @@ import productModel from '../models/product.js';
 
 const productsRouter = Router();
 
+// GET: Obtienes todos los productos, podes filtrar por status o category, poner cuantas paginas, limite u ordenarlos
 productsRouter.get('/', async (req, res) => {
   try {
     // limit entre {} porque puede existir mas de un elemento para buscar. http://localhost:8000/products?limit=2
     const { limit, pages, filter, ord } = req.query;
 
+    // Puede modificarse el metodo a filtrar por status o category
     let metFilter;
 
+    // Si la pagina enviada (pages) es distinta de undefined se consulta por pages, sino por defecto consulto por 1
     const page = pages != undefined ? pages : 1;
 
     const limi = limit != undefined ? limit : 10;
 
+    // filtramos por status(disponibilidad) y sino por categoria
     if (filter == 'true' || filter == 'false') {
       metFilter = 'status';
     } else {
@@ -22,6 +26,7 @@ productsRouter.get('/', async (req, res) => {
 
     const query = metFilter != undefined ? { [metFilter]: filter } : {};
 
+    // Consulto por el metodo de ordenamiento: http://localhost:8000/api/products?&ord=desc
     const ordQuery = ord !== undefined ? { price: ord } : {};
 
     // .paginate({metodo de ordenamiento}, {limite}, {page}); Asi decis que se filtra por eso:
@@ -41,7 +46,8 @@ productsRouter.get('/', async (req, res) => {
   }
 });
 
-//: significa que es modificable (puede ser un 4 como un 10 como un 75)
+// GET: Obtienes un producto por su id
+// : significa que es modificable (puede ser un 4 como un 10 como un 75)
 productsRouter.get('/:pid', async (req, res) => {
   try {
     const idProduct = req.params.pid; //Todo dato que se consulta desde un parametro es un string
@@ -58,6 +64,7 @@ productsRouter.get('/:pid', async (req, res) => {
   }
 });
 
+// POST: Es para crear un nuevo producto
 productsRouter.post('/', async (req, res) => {
   try {
     // todo dato que se consulta desde un parametro es un string, si es un numero hay que parsearlo
@@ -74,7 +81,7 @@ productsRouter.post('/', async (req, res) => {
   }
 });
 
-// metodo put es para actualizar
+// PUT: Es para actualizar un producto segun su id
 productsRouter.put('/:pid', async (req, res) => {
   try {
     // todo dato que se consulta desde un parametro es un string, si es un numero hay que parsearlo
@@ -93,6 +100,7 @@ productsRouter.put('/:pid', async (req, res) => {
   }
 });
 
+// DELETE: Es para eliminar un producto segun su id
 productsRouter.delete('/:pid', async (req, res) => {
   try {
     const idProduct = req.params.pid;
