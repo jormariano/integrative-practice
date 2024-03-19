@@ -1,4 +1,3 @@
-// Clase 8 - 11'
 import { Router } from 'express';
 import productModel from '../models/product.js';
 
@@ -7,34 +6,34 @@ const productsRouter = Router();
 productsRouter.get('/', async (req, res) => {
   try {
     // limit entre {} porque puede existir mas de un elemento para buscar. http://localhost:8000/products?limit=2
-    const { limit } = req.query;
+    const { limit, pages, filter, ord } = req.query;
 
-    // .lean() es para pasar a json. Cambie productManager.getProduct(); por:
-    const prods = await productModel.find().lean();
+    let metFilter;
 
-    let limits = parseInt(limit);
+    const page = pages != undefined ? pages : 1;
 
-    if (!limits) {
-      limits = prods.lenght;
+    const limi = limit != undefined ? limit : 10;
+
+    if (filter == 'true' || filter == 'false') {
+      metFilter = 'status';
+    } else {
+      if (filter !== undefined) metFilter = 'category';
     }
 
-    /* el metodo slice() se utiliza para extraer una porción de un array y devolverla como un nuevo array.
-    No modifica el array original, devuelve un nuevo array que contiene los elementos seleccionados. 
-    Acepta dos parámetros, inicio y fin (puede ser undefined), para indicar los índices desde y hasta los cuales extraer los elementos.
-    El valor inicial siempre es 0 
-    Si se envia cualquier caracter, que no sea un num, lo toma como si fuera 0 y devuelve array vacio [] 
-    Para resolver esto, utilizamos el metodo parseInt porque su funcion es convertir una cadena (string) en un número entero 
-    Al parsear un string no numerico, devuelve NaN
-    */
+    const query = metFilter != undefined ? { [metFilter]: filter } : {};
 
-    const prodsLimit = prods.slice(0, limit);
+    const ordQuery = ord !== undefined ? { price: ord } : {};
+
+    // .paginate({metodo de ordenamiento}, {limite}, {page}); Asi decis que se filtra por eso:
+    // Se filtra aca porque puede filtrar por status o por category
+    const prods = await productModel.paginate(query, {
+      limit: limi,
+      pages: page,
+      sort: ordQuery,
+    });
 
     // la peticion fue correcta
-    res.status(200).render('templates/home', {
-      showProducts: true,
-      products: prodsLimit,
-      css: 'home.css',
-    });
+    res.status(200).send(prods);
   } catch (error) {
     res.status(500).render('templates/error', {
       error: error,
