@@ -20,6 +20,9 @@ import { engine } from 'express-handlebars';
 import { Server } from 'socket.io';
 import messageModel from './models/messages.js';
 import indexRouter from './routes/indexRouter.js';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 
 // Configuraciones
 const app = express();
@@ -41,6 +44,20 @@ mongoose
 
 // Middlewares: intermediario que se ejecuta antes de llegar al endpoint. Express no trabaja con json y usa un middleware
 app.use(express.json());
+app.use(cookieParser('ClaveSecreta'));
+app.use(
+  session({
+    secret: 'CoderSecret',
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl:
+        'mongodb+srv://jorgelinamariano01:jorgelinacoderhouse@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+      // tiempo de vida de la sesion en segundos:
+      ttl: 100,
+    }),
+  })
+);
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 // Las vistas de la aplicacion se encuentran en:
@@ -48,6 +65,51 @@ app.set('views', __dirname + '/views');
 
 // Routes
 app.use('/', indexRouter);
+// Routes Cookies
+// Crear/Guardar una cookie
+app.get('/setCookie', (req, res) => {
+  res
+    .cookie('CookieCookie', 'Esto es una cookie', {
+      // atributo con fecha de expiracion
+      maxAge: 30000,
+      // atributo para cookie firmada
+      signed: true,
+    })
+    .send('Cookie creada');
+});
+// Obtener una cookie y responder solo con las cookies firmadas (no modificadas)
+app.get('/getCookie', (req, res) => {
+  res.send(req.signedCookies);
+});
+// Eliminar una cookie
+app.get('/deleteCookie', (req, res) => {
+  res.clearCookie('CookieCookie').send('Cookie eliminada');
+});
+
+// Session Routes
+// Guardo sesiones de mi usuario
+app.get('/session', (req, res) => {
+  if (req.session.counter) {
+    req.session.counter++;
+    res.send(`Sos el usuario Nº ${req.session.counter} en ingresar a la web`);
+  } else {
+    req.session.counter = 1;
+    res.send('Sos el primer usuario que ingresa a la web');
+  }
+});
+
+// Logear a los usuarios
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+
+  // simulamos la consulta a una DB
+  if (email == 'admin@gmail.com' && password == '1234') {
+    req.session.email = email;
+    req.session.password = password;
+    console.log(req.session);
+  }
+  res.send('Login valido');
+});
 
 // Los mensajes vienen de la base de datos
 io.on('connection', (socket) => {

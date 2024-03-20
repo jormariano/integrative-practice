@@ -127,7 +127,11 @@ cartRouter.put('/:cid/products/:pid', async (req, res) => {
 
     const updatedCart = await cartModel.findOneAndUpdate(
       { _id: cartId, 'products.id_prod': productId },
+
+      // Se actualiza el carrito
       { $set: { 'products.$.quantity': quantity } },
+
+      // Se devuelve el carrito actualizado
       { new: true }
     );
 
@@ -137,7 +141,7 @@ cartRouter.put('/:cid/products/:pid', async (req, res) => {
 
     res.status(200).send(updatedCart);
   } catch (error) {
-    res.status(500).send(`IError interno del servidor: ${error}`);
+    res.status(500).send(`Error interno del servidor: ${error}`);
   }
 });
 
