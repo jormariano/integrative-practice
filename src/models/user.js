@@ -1,15 +1,11 @@
 import { Schema, model } from 'mongoose';
 
 const userSchema = new Schema({
-  name: {
+  first_name: {
     type: String,
     require: true,
   },
-  lastname: {
-    type: String,
-    require: true,
-  },
-  password: {
+  last_name: {
     type: String,
     require: true,
   },
@@ -17,10 +13,14 @@ const userSchema = new Schema({
     type: Number,
     require: true,
   },
-  mail: {
+  email: {
     type: String,
     unique: true,
     index: true,
+  },
+  password: {
+    type: String,
+    require: true,
   },
   rol: {
     type: String,

@@ -53,8 +53,8 @@ app.use(
     store: MongoStore.create({
       mongoUrl:
         'mongodb+srv://jorgelinamariano01:jorgelinacoderhouse@cluster0.sxghmkf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
-      // tiempo de vida de la sesion en segundos:
-      ttl: 100,
+      // tiempo de vida de la sesion en segundos, podes poner 60*60 o 10000:
+      ttl: 60 * 60,
     }),
   })
 );

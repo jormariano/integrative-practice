@@ -3,6 +3,7 @@ import { userModel } from '../models/user.js';
 
 const userRouter = Router();
 
+// Obtenes los usuarios creados
 userRouter.get('/', async (req, res) => {
   try {
     const users = await userModel.find();
@@ -12,13 +13,15 @@ userRouter.get('/', async (req, res) => {
   }
 });
 
+/*
+// Crear un usuario
 userRouter.post('/', async (req, res) => {
   try {
-    const { name, lastname, mail, age, password } = req.body;
+    const { name, lastname, email, age, password } = req.body;
     const result = await userModel.create({
       name,
       lastname,
-      mail,
+      email,
       age,
       password,
     });
@@ -27,5 +30,7 @@ userRouter.post('/', async (req, res) => {
     res.status(500).send('Error al crear usuarios: ', e);
   }
 });
+
+*/
 
 export default userRouter;
